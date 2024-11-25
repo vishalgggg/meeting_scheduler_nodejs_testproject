@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Scheduler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #time-slots {
+            margin-bottom: 20px;
+        }
+        .slot {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .slot.booked {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+        #booking-form {
+            display: none;
+            margin-bottom: 20px;
+        }
+        #scheduled-meetings {
+            margin-top: 20px;
+        }
+        .meeting {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+        }
+        #available-slots {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="available-slots">Available Slots: <span id="slot-count">4</span></div>
+    <div id="time-slots">
+        <div class="slot" data-time="1:00 PM">1:00 PM</div>
+        <div class="slot" data-time="2:00 PM">2:00 PM</div>
+        <div class="slot" data-time="3:00 PM">3:00 PM</div>
+        <div class="slot" data-time="4:00 PM">4:00 PM</div>
+    </div>
+    <div id="booking-form">
+        <h3>Book</h3>
+        <form id="form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <button type="submit">Book</button>
+            <button type="button" id="cancel">Cancel</button>
+        </form>
+    </div>
+    <div id="scheduled-meetings">
+        <h3>Scheduled Meetings</h3>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const timeSlots = document.querySelectorAll('.slot');
+            const bookingForm = document.getElementById('booking-form');
+            const form = document.getElementById('form');
+            const cancelBtn = document.getElementById('cancel');
+            const scheduledMeetings = document.getElementById('scheduled-meetings');
+            const slotCount = document.getElementById('slot-count');
+            let selectedSlot = null;
+            let availableSlots = timeSlots.length;
+
+            timeSlots.forEach(slot => {
+                slot.addEventListener('click', () => {
+                    if (!slot.classList.contains('booked')) {
+                        selectedSlot = slot;
+                        bookingForm.style.display = 'block';
+                    }
+                });
+            });
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const meeting = document.createElement('div');
+                meeting.classList.add('meeting');
+                meeting.innerHTML = `<strong>${name}</strong> (${email}) - ${selectedSlot.dataset.time} <button class="cancel-meeting">Cancel</button>`;
+                scheduledMeetings.appendChild(meeting);
+                selectedSlot.classList.add('booked');
+                bookingForm.style.display = 'none';
+                form.reset();
+                availableSlots--;
+                slotCount.textContent = availableSlots;
+
+                meeting.querySelector('.cancel-meeting').addEventListener('click', () => {
+                    scheduledMeetings.removeChild(meeting);
+                    selectedSlot.classList.remove('booked');
+                    availableSlots++;
+                    slotCount.textContent = availableSlots;
+                });
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                bookingForm.style.display = 'none';
+                form.reset();
+            });
+        });
+    </script>
+</body>
+</html>
