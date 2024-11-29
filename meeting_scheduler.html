@@ -79,9 +79,7 @@
                         bookingForm.style.display = 'block';
                     }
                 });
-            });
-
-            form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('name').value;
                 const email = document.getElementById('email').value;
@@ -95,19 +93,23 @@
                 availableSlots--;
                 slotCount.textContent = availableSlots;
 
-                meeting.querySelector('.cancel-meeting').addEventListener('click', () => {
+                meeting.querySelector('.cancel-meeting').addEventListener('click', (e) => {
+                    e.preventDefault();
                     scheduledMeetings.removeChild(meeting);
                     selectedSlot.classList.remove('booked');
                     availableSlots++;
                     slotCount.textContent = availableSlots;
                 });
-            });
+            } );
 
+            } );
+
+            
             cancelBtn.addEventListener('click', () => {
                 bookingForm.style.display = 'none';
                 form.reset();
             });
-        });
+        } );
     </script>
 </body>
 </html>

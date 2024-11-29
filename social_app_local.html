@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Dynamic Post</title>
+    <style>
+        body {
+            background-color: pink;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            width: 300px;
+            margin: 10px;
+        }
+        img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        p {
+            font-size: 16px;
+            color: black;
+        }
+        button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+        #comment-section {
+            display: none;
+            margin-top: 10px;
+        }
+        #comments {
+            color: black;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create a Post</h2>
+        <form id="post-form">
+            <label for="post-link">Post Link:</label>
+            <input type="text" id="post-link" name="post-link" placeholder="Enter image link">
+            <label for="post-description">Post Description:</label>
+            <textarea id="post-description" name="post-description" placeholder="Enter post description"></textarea>
+            <button type="button" id="create-post-button">Create Post</button>
+        </form>
+    </div>
+
+    <div id="posts"></div>
+
+</body>
+<script> document.getElementById('create-post-button').addEventListener('click', function() {
+    var postLink = document.getElementById('post-link').value;
+    var postDescription = document.getElementById('post-description').value;
+
+    if (postLink.trim() !== "" && postDescription.trim() !== "") {
+        var post = {
+            link: postLink,
+            description: postDescription,
+            comments: []
+        };
+
+        // Save post to local storage
+        var posts = JSON.parse(localStorage.getItem('posts')) || [];
+        posts.push(post);
+        localStorage.setItem('posts', JSON.stringify(posts));
+
+        // Clear input fields
+        document.getElementById('post-link').value = '';
+        document.getElementById('post-description').value = '';
+
+        // Render posts
+        renderPosts();
+    }
+});
+
+function renderPosts() {
+    var posts = JSON.parse(localStorage.getItem('posts')) || [];
+    var postsContainer = document.getElementById('posts');
+    postsContainer.innerHTML = '';
+
+    posts.forEach(function(post, index) {
+        var postContainer = document.createElement('div');
+        postContainer.className = 'container';
+
+        var img = document.createElement('img');
+        img.src = post.link;
+        img.alt = 'Post Image';
+        postContainer.appendChild(img);
+
+        var p = document.createElement('p');
+        p.textContent = post.description;
+        postContainer.appendChild(p);
+
+        var commentButton = document.createElement('button');
+        commentButton.textContent = 'Comment';
+        commentButton.addEventListener('click', function() {
+            var commentSection = this.nextElementSibling;
+            commentSection.style.display = 'block';
+        });
+        postContainer.appendChild(commentButton);
+
+        var commentSection = document.createElement('div');
+        commentSection.id = 'comment-section';
+
+        var commentInput = document.createElement('input');
+        commentInput.type = 'text';
+        commentInput.id = 'comment-input-' + index;
+        commentInput.placeholder = 'Write a comment';
+        commentSection.appendChild(commentInput);
+
+        var sendButton = document.createElement('button');
+        sendButton.textContent = 'Send';
+        sendButton.addEventListener('click', function() {
+            var commentText = commentInput.value;
+            if (commentText.trim() !== "") {
+                post.comments.push(commentText);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                renderPosts();
+            }
+        });
+        commentSection.appendChild(sendButton);
+
+        postContainer.appendChild(commentSection);
+
+        var commentsDiv = document.createElement('div');
+        commentsDiv.id = 'comments';
+
+        post.comments.forEach(function(comment) {
+            var newComment = document.createElement('p');
+            newComment.textContent = comment;
+            commentsDiv.appendChild(newComment);
+        });
+
+        postContainer.appendChild(commentsDiv);
+
+        postsContainer.appendChild(postContainer);
+    });
+}
+
+// Render posts on page load
+window.onload = function() {
+    renderPosts();
+};
+ </script>
+</html>
