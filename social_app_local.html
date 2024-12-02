@@ -43,6 +43,7 @@
             margin-top: 10px;
         }
         #comments {
+            display: none;
             color: black;
         }
         input[type="text"], textarea {
@@ -114,9 +115,20 @@ function renderPosts() {
 
         var commentButton = document.createElement('button');
         commentButton.textContent = 'Comment';
+        var flip = 1;
         commentButton.addEventListener('click', function() {
-            var commentSection = this.nextElementSibling;
+            // var commentSection = this.nextElementSibling;
+        if(flip)
+        {
             commentSection.style.display = 'block';
+            commentsDiv.style.display = 'block';
+            flip = !flip;
+        }
+        else{
+            commentSection.style.display = 'None';
+            commentsDiv.style.display = 'None';
+            flip = !flip;
+        }
         });
         postContainer.appendChild(commentButton);
 
@@ -136,7 +148,11 @@ function renderPosts() {
             if (commentText.trim() !== "") {
                 post.comments.push(commentText);
                 localStorage.setItem('posts', JSON.stringify(posts));
-                renderPosts();
+                //renderPosts();
+                var newComment = document.createElement('p');
+                newComment.textContent = commentText;
+                commentsDiv.appendChild(newComment);
+                commentInput.value = "";
             }
         });
         commentSection.appendChild(sendButton);
