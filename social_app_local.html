@@ -70,21 +70,22 @@
     <div id="posts"></div>
 
 </body>
-<script> document.getElementById('create-post-button').addEventListener('click', function() {
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script> document.getElementById('create-post-button').addEventListener('click', async function() {
     var postLink = document.getElementById('post-link').value;
     var postDescription = document.getElementById('post-description').value;
 
     if (postLink.trim() !== "" && postDescription.trim() !== "") {
         var post = {
-            link: postLink,
+            postLink: postLink,
             description: postDescription,
-            comments: []
+            
         };
 
         // Save post to local storage
-        var posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts.push(post);
-        localStorage.setItem('posts', JSON.stringify(posts));
+        await axios.post('http://localhost:3000/posts', post);
+       
+        
 
         // Clear input fields
         document.getElementById('post-link').value = '';
@@ -93,19 +94,19 @@
         // Render posts
         renderPosts();
     }
-});
+} );
 
-function renderPosts() {
-    var posts = JSON.parse(localStorage.getItem('posts')) || [];
+async function renderPosts() {
+    const response = await axios.get('http://localhost:3000/posts');
     var postsContainer = document.getElementById('posts');
     postsContainer.innerHTML = '';
 
-    posts.forEach(function(post, index) {
+    response.data.forEach(async function (post, index)  {
         var postContainer = document.createElement('div');
         postContainer.className = 'container';
 
         var img = document.createElement('img');
-        img.src = post.link;
+        img.src = post.postLink;
         img.alt = 'Post Image';
         postContainer.appendChild(img);
 
@@ -116,8 +117,9 @@ function renderPosts() {
         var commentButton = document.createElement('button');
         commentButton.textContent = 'Comment';
         var flip = 1;
-        commentButton.addEventListener('click', function() {
+        commentButton.addEventListener('click', async function() {
             // var commentSection = this.nextElementSibling;
+        
         if(flip)
         {
             commentSection.style.display = 'block';
@@ -129,7 +131,10 @@ function renderPosts() {
             commentsDiv.style.display = 'None';
             flip = !flip;
         }
-        });
+        
+        
+        } );
+     
         postContainer.appendChild(commentButton);
 
         var commentSection = document.createElement('div');
@@ -143,12 +148,10 @@ function renderPosts() {
 
         var sendButton = document.createElement('button');
         sendButton.textContent = 'Send';
-        sendButton.addEventListener('click', function() {
+        sendButton.addEventListener('click', async function() {
             var commentText = commentInput.value;
             if (commentText.trim() !== "") {
-                post.comments.push(commentText);
-                localStorage.setItem('posts', JSON.stringify(posts));
-                //renderPosts();
+                await axios.post(`http://localhost:3000/comments/${post.id}`,{comment:commentText})
                 var newComment = document.createElement('p');
                 newComment.textContent = commentText;
                 commentsDiv.appendChild(newComment);
@@ -161,18 +164,21 @@ function renderPosts() {
 
         var commentsDiv = document.createElement('div');
         commentsDiv.id = 'comments';
-
-        post.comments.forEach(function(comment) {
-            var newComment = document.createElement('p');
-            newComment.textContent = comment;
-            commentsDiv.appendChild(newComment);
-        });
-
-        postContainer.appendChild(commentsDiv);
-
-        postsContainer.appendChild(postContainer);
-    });
+        var comments = await axios.get(`http://localhost:3000/comments/${post.id}`)
+        
+        comments.data.forEach(function(comments) {
+        var newComment = document.createElement('p');
+        newComment.textContent = comments.comment;
+        commentsDiv.appendChild(newComment);
+        
+} );
+    postContainer.appendChild(commentsDiv);
+    postsContainer.appendChild(postContainer);
+   
+});
 }
+
+
 
 // Render posts on page load
 window.onload = function() {
